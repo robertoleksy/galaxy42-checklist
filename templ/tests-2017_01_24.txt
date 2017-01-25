@@ -31,6 +31,12 @@ build.native.linux = $download.git + follow instructions in README.md to build f
 	-> it includes call to command "./do"
 ;
 
+MAIN_PLATFORMS_GITIAN =
+	linux
+	windows
+	macosx
+;
+
 SUPPORTED_PLATFORM_RUN =
 	linux-debian-8-amd64,
 	linux-devuan-8-amd64,
@@ -68,6 +74,20 @@ CORE_SERVERS =
 ;
 
 # --- Tests ---
+
+for each platform in $MAIN_PLATFORMS_GITIAN {
+	[...] <- $platform
+  Run the Gitian build, like:  gitian -m -L image  for given platform (-L or -W or -M, prepare macosx SDK for -M first)
+
+  [...] <- fill in the sha256sum of the proper file in ~/var-gitian-macosx/gitian-builder/build/out,
+  # in case of macosx calculate sum of sums of files:
+  # debian:~/var-gitian-macosx/gitian-builder/build/out$ LANG=C sha256deep -r * | sort | sha256sum
+	# 6f3eabfc99212482428065dfbf37685b8433c7142992e8e8676fa42ebffc1212
+
+  # also please upload the file somewhere e.g. to h.p.meshnet.pl and share a link to it:
+  # in case of mac os X
+  [...] <- uploaded file
+}
 
 for each $platform from $SUPPORTED_PLATFORM_RUN {
 	for each $install from $SUPPORTED_PLATFORM_INSTALL {

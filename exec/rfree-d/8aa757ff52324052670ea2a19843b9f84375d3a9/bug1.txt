@@ -1,0 +1,42 @@
+
+=========================================================================================
+Regarding project: (see the directory containing this file in checklist git report)
+Project version gitrev: (see the directory containing this file in checklist git report)
+Platform: Linux Debian 8 amd64
+
+=========================================================================================
+Situation:
+downloaded source code from github
+
+=========================================================================================
+What you tried to do:
+try to install it
+
+ALSO: same problem happens inside the install.sh when it goes further.
+
+=========================================================================================
+What action / command you run:
+./install.sh
+
+=========================================================================================
+What happened then:
+program said:
+
+$ ./install.sh
+this_script_must_be_run_as_root_or --sudo
+
+ALSO: next, in the installer text UI the texts are also untranslated IDs, like:
+L_program_is_pre_alpha
+
+=========================================================================================
+What should had happened instead:
+The text should be correct english without this '_' characters etc.
+
+
+=========================================================================================
+Notes / ideas for solution:
+
+I guess the .mo files are not yet generated for the installer from it's .po files.
+We should run that at very beginning of install.sh.
+
+

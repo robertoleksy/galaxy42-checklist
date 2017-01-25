@@ -1,0 +1,230 @@
+
+#
+# This is a checklist. It is written in simple text, mix of [ ] checklist, with trivial "script" for loops
+#
+# Syntax:
+# hash character (#) makes line a comment
+#
+# variable = something ;
+# var_bar = some text ;
+# var_foo = something + $var_bar ;
+# some_list = item1 , item2 , item3 ;
+# for each $loop_variable in $some_list { ..... }
+# [...] <- $variable
+# [ ] checkbox item
+#
+
+-------------------
+Test EXECUTED by rfree-d, for galaxy42 gitrev 8aa757ff52324052670ea2a19843b9f84375d3a9
+from https://github.com/yedino/galaxy42.git
+test on Wed Jan 25 19:52:53 UTC 2017.
+-------------------
+
+# Plan is following:
+section.build.static = on a linux, download git code and run gitian builds
+section.build.native = on given OS, build it using the native build method for it
+section.use = using binaries from previous steps, do various use tests
+section.break = try to break anything, apply own ideas
+
+download.git = download our code from any git repository ;
+download.git.github.com = download from https://github.com/yedino/galaxy42/ ;
+
+runnable = prepare any version of program, see any $build or any $install ;
+
+build.native.linux = $download.git + follow instructions in README.md to build for your Linux
+	-> must work at least on Debian (amd64)
+	-> it includes instruction to use command "./install.sh"
+	-> it includes call to command "./do"
+;
+
+MAIN_PLATFORMS_GITIAN =
+	linux
+	windows
+	macosx
+;
+
+SUPPORTED_PLATFORM_RUN =
+	linux-debian-8-amd64,
+	linux-devuan-8-amd64,
+	linux-devuan-8-amd64,
+	linux-ubuntu-15.10-amd64,
+	linux-ubuntu-16.10-amd64,
+
+	windows-win10,
+;
+
+SUPPORTED_PLATFORM_INSTALL =
+	for_windows_install_by_running_from_gitian_static_build,
+	for_windows_install_by_building_here_with_msvc,
+	for_windows_install_by_building_here_with_cygwin,
+
+	for_linux_install_by_running_from_gitian_static_build,
+	for_linux_install_building_here_with_gcc,
+	for_linux_install_building_here_with_clang,
+
+	for_macosx_install_by_runing_from_gitian_static_build,
+	for_macosx_install_building_here_with_clang,
+;
+
+TARGET_SERVICE_HTTP =
+  http://[fd42:f6c4:9d19:f128:30df:b289:aef0:25f5]/ ,
+  http://[fd42:5315:70bc:fccc:362c:e5e9:3562:438]/
+;
+TARGET_SERVICE_MUMBLE =
+	g.meshnet.pl
+;
+
+# serves peering, and ipv6
+CORE_SERVERS =
+	192.166.218.58:19042-fd42:f6c4:9d19:f128:30df:b289:aef0:25f5
+;
+
+# --- Tests ---
+
+for each platform in $MAIN_PLATFORMS_GITIAN {
+	[...] <- $platform
+  Run the Gitian build, like:  gitian -m -L image  for given platform (-L or -W or -M, prepare macosx SDK for -M first)
+
+  [...] <- fill in the sha256sum of the proper file in ~/var-gitian-macosx/gitian-builder/build/out,
+  # in case of macosx calculate sum of sums of files:
+  # debian:~/var-gitian-macosx/gitian-builder/build/out$ LANG=C sha256deep -r * | sort | sha256sum
+	# 6f3eabfc99212482428065dfbf37685b8433c7142992e8e8676fa42ebffc1212
+
+  # also please upload the file somewhere e.g. to h.p.meshnet.pl and share a link to it:
+  # in case of mac os X
+  [...] <- uploaded file
+}
+
+for each $platform from $SUPPORTED_PLATFORM_RUN {
+
+
+	for each $install from $SUPPORTED_PLATFORM_INSTALL {
+
+		only for: $install that makes sense on this $platform
+
+		[linux-debian-8-amd64] <- $platform
+		[for_linux_install_building_here_with_gcc] <- $install
+
+		project.works.runs = $runnable + start program with option like "--peer ...", so build at least 1-to-1 network
+		and test {
+			[+] project.works.runs.ping.to-peer += run ping6 to the ipv6-g42 of the peer you specified in --peer
+			[?] project.works.runs.ping.from-peer += run ping6 to the ipv6-g42 of your, from another peer that peers into me
+			[+] project.works.runs.service += run any TCP based connection to the other computer (or vice-versa) e.g. run apache there and open it
+			[?] project.works.runs.service.ip-change += do that, and then change your IP to which the other computer peers into (e.g. LAN ip). still works?
+		}
+
+		project.works.runs-mesh = $runnable + start program with option like "--peer" to some peers including peers connected to $CORE_SERVER
+		and test {
+			[+] project.works.runs-mesh.ping.core-server += run ping6 to some CORE_SERVER
+			# same as above, we --peer to 192.166.218.58:19042-fd42:f6c4:9d19:f128:30df:b289:aef0:25f5
+
+			for each $service from $TARGET_SERVICE_HTTP {
+				[+] project.works.runs-mesh.http += open in web browser, [http://[fd42:f6c4:9d19:f128:30df:b289:aef0:25f5]/] <- $service , does it load (ctrl-R clear cache!)
+			}
+			for each $service from $TARGET_SERVICE_HTTP {
+				[+] project.works.runs-mesh.http += open in web browser, [http://[fd42:5315:70bc:fccc:362c:e5e9:3562:438]/] <- $service , does it load (ctrl-R clear cache!)
+			}
+
+			[+] project.works.runs-mesh.service.mumble += run client of program Mumble connect to one of $TARGET_SERVICE_MUMBLE, works?
+		} # test
+
+		[?] project.works.after-sleep = $runnable + some of test above: put computer to sleep, wake up, see if still works
+		[?] project.works.after-netfail = $runnable + some of test above: disconnect network cable, fix, see if still works
+		[+] project.works.after-ifdown = $runnable + some of test above: DISABLE the main network card (ifdown etc), fix, see if still works
+
+  } # $install
+
+
+
+
+	for each $install from $SUPPORTED_PLATFORM_INSTALL {
+
+		xxxxxxxxxxxxxxxxxxxxxxxxx TODO
+		same for linux but installed from native version builded by someone.
+
+		only for: $install that makes sense on this $platform
+
+		[linux-debian-8-amd64] <- $platform
+		[native ....  static gitian downloaded from someone] <- $install
+		paste here sha256sum of the file you downloaded with the static-builded version of this project.
+
+		xxxxxxxxxxxxxxxxxxxxxx fill in all below  TODO xxxxxxxxxxxx
+
+		project.works.runs = $runnable + start program with option like "--peer ...", so build at least 1-to-1 network
+		and test {
+			[?] project.works.runs.ping.to-peer += run ping6 to the ipv6-g42 of the peer you specified in --peer
+			[?] project.works.runs.ping.from-peer += run ping6 to the ipv6-g42 of your, from another peer that peers into me
+			[ ] project.works.runs.service += run any TCP based connection to the other computer (or vice-versa) e.g. run apache there and open it
+			[ ] project.works.runs.service.ip-change += do that, and then change your IP to which the other computer peers into (e.g. LAN ip). still works?
+		}
+
+		project.works.runs-mesh = $runnable + start program with option like "--peer" to some peers including peers connected to $CORE_SERVER
+		and test {
+			[ ] project.works.runs-mesh.ping.core-server += run ping6 to some CORE_SERVER
+
+			for each $service from $TARGET_SERVICE_HTTP {
+				[ ] project.works.runs-mesh.http += open in web browser, [....] <- $service , does it load (ctrl-R clear cache!)
+			}
+
+			[ ] project.works.runs-mesh.service.mumble += run client of program Mumble connect to one of $TARGET_SERVICE_MUMBLE, works?
+		} # test
+
+		[ ] project.works.after-sleep = $runnable + some of test above: put computer to sleep, wake up, see if still works
+		[ ] project.works.after-netfail = $runnable + some of test above: disconnect network cable, fix, see if still works
+		[ ] project.works.after-ifdown = $runnable + some of test above: DISABLE the main network card (ifdown etc), fix, see if still works
+
+  } # $install
+
+
+# ... and so on ... for Ubuntu - native
+# ... and so on ... for Ubuntu - static
+
+# ... and so on ... for Windows
+# ... and so on ... for Windows gitian static
+# ... and so on ... for Windows native build msvc
+
+# around 10-20 tests .......................................
+# TODO (by others)
+
+	for each $install from $SUPPORTED_PLATFORM_INSTALL {
+
+		only for: $install that makes sense on this $platform
+
+		[...] <- $platform
+		[...] <- $install
+
+		project.works.runs = $runnable + start program with option like "--peer ...", so build at least 1-to-1 network
+		and test {
+			[ ] project.works.runs.ping.to-peer += run ping6 to the ipv6-g42 of the peer you specified in --peer
+			[ ] project.works.runs.ping.from-peer += run ping6 to the ipv6-g42 of your, from another peer that peers into me
+			[ ] project.works.runs.service += run any TCP based connection to the other computer (or vice-versa) e.g. run apache there and open it
+			[ ] project.works.runs.service.ip-change += do that, and then change your IP to which the other computer peers into (e.g. LAN ip). still works?
+		}
+
+		project.works.runs-mesh = $runnable + start program with option like "--peer" to some peers including peers connected to $CORE_SERVER
+		and test {
+			[ ] project.works.runs-mesh.ping.core-server += run ping6 to some CORE_SERVER
+
+			for each $service from $TARGET_SERVICE_HTTP {
+				[ ] project.works.runs-mesh.http += open in web browser, [....] <- $service , does it load (ctrl-R clear cache!)
+			}
+
+			[ ] project.works.runs-mesh.service.mumble += run client of program Mumble connect to one of $TARGET_SERVICE_MUMBLE, works?
+		} # test
+
+		[ ] project.works.after-sleep = $runnable + some of test above: put computer to sleep, wake up, see if still works
+		[ ] project.works.after-netfail = $runnable + some of test above: disconnect network cable, fix, see if still works
+		[ ] project.works.after-ifdown = $runnable + some of test above: DISABLE the main network card (ifdown etc), fix, see if still works
+
+  } # $install
+
+} # $platform
+
+
+
+
+
+[?] goal.break = try to break some of above stuff by unusual use (but in limits of project scope / supported platforms - see documentation)
+
+
+

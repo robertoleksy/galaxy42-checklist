@@ -1,0 +1,37 @@
+
+=========================================================================================
+Regarding project: (see the directory containing this file in checklist git report)
+Project version gitrev: (see the directory containing this file in checklist git report)
+Platform: Linux Debian 8 amd64
+
+=========================================================================================
+Situation:
+downloaded source code from github
+done install.sh
+
+=========================================================================================
+What you tried to do:
+build it
+
+=========================================================================================
+What action / command you run:
+./do
+
+=========================================================================================
+What happened then:
+
+Compilations had warnings:
+
+/home/rafalcode/TEST1/galaxy42/depends/googletest/googletest/include/gtest/gtest.h:1392:11: warning: comparison of integers of different signs: 'const unsigned int' and 'const int' [-Wsign-compare]
+
+and maybe more like it
+
+
+=========================================================================================
+What should had happened instead:
+
+No warnings
+
+=========================================================================================
+Notes / ideas for solution:
+

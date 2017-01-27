@@ -1,0 +1,55 @@
+
+#
+# This is a checklist. It is written in simple text, mix of [ ] checklist, with trivial "script" for loops
+#
+# Syntax:
+# hash character (#) makes line a comment
+#
+# variable = something ;
+# var_bar = some text ;
+# var_foo = something + $var_bar ;
+# some_list = item1 , item2 , item3 ;
+# for each $loop_variable in $some_list { ..... }
+# [...] <- $variable
+# [ ] checkbox item
+#
+
+# Plan is following:
+section.build.native_cygwin = on given OS, build it using the native build method for it
+section.build.native_mscv = on given OS, build it using the native build method for it
+section.use = using binaries from previous steps, do various use tests
+section.break = try to break anything, apply own ideas
+
+download.git = download our code from any git repository ;
+download.git.github.com = download from https://github.com/yedino/galaxy42/ ;
+
+runnable = prepare any version of program, see any $build or any $install ;
+
+SUPPORTED_PLATFORM_RUN =
+	windows-win7_x64,
+	windows-win8_x64,
+	windows-win10_x64,
+;
+
+TARGET_SERVICE_HTTP =
+  http://[fd42:f6c4:9d19:f128:30df:b289:aef0:25f5]/ ,
+  http://[fd42:5315:70bc:fccc:362c:e5e9:3562:438]/
+;
+
+# serves peering, and ipv6
+CORE_SERVERS =
+	192.166.218.58:19042-fd42:f6c4:9d19:f128:30df:b289:aef0:25f5
+;
+
+# --- Tests ---
+for each platform in SUPPORTED_PLATFORM_RUN {
+	[+] build with cygwin
+	[+] build with MSVC
+	[+] run with parameter "--peer 192.166.218.58:19042-fd42:f6c4:9d19:f128:30df:b289:aef0:25f5"
+	[+] run ipconfig and check ipv6 address
+	[-] ping -6 $TARGET_SERVICE_HTTP
+	[-] run $TARGET_SERVICE_HTTP in firefox
+
+	run installer
+	[+] run ipconfig and check ipv6 address
+}

@@ -1,0 +1,34 @@
+
+=========================================================================================
+Regarding project: (see the directory containing this file in checklist git report)
+Project version gitrev: (see the directory containing this file in checklist git report)
+Platform: Windows 7x64, 8.1x64, 10x64
+
+=========================================================================================
+Situation:
+remote servers (like fd42:f6c4:9d19:f128:30df:b289:aef0:25f5 and fd42:5315:70bc:fccc:362c:e5e9:3562:438) not works: ping and http connection
+local(LAN) http server work
+
+=========================================================================================
+What you tried to do:
+use it
+
+=========================================================================================
+What action / command you run:
+./tunserver.elf --peer 192.166.218.58:19042-fd42:f6c4:9d19:f128:30df:b289:aef0:25f5
+ping -6 fd42:f6c4:9d19:f128:30df:b289:aef0:25f5
+ping -6 fd42:5315:70bc:fccc:362c:e5e9:3562:438
+
+=========================================================================================
+What happened then:
+ping output: request time out / destination host unreachable
+http://[fd42:f6c4:9d19:f128:30df:b289:aef0:25f5]/ and http://[fd42:5315:70bc:fccc:362c:e5e9:3562:438]/ not works in firefox
+
+=========================================================================================
+What should had happened instead:
+ping and websites should works
+
+=========================================================================================
+Notes / ideas for solution:
+possible bug in asio udp / tun code
+TODO try reproduce on MAC
